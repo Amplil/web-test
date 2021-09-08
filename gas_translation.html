@@ -2,11 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>Form</title>
+  <title>GAS翻訳</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" href="https://cdn.rawgit.com/necolas/normalize.css/master/normalize.css">
   <link rel="stylesheet" href="https://cdn.rawgit.com/milligram/milligram/master/dist/milligram.min.css">
   <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <style>
     form {
       width: 50%;
@@ -18,18 +19,6 @@
     .form-row button {
       flex: auto;
       margin-left: 10px;
-    }
-    .badge {
-      font-size: 10px;
-      font-weight: bold;
-      line-height: 1;
-      display: inline-block;
-      background: #f6f7fa;
-      padding: 4px 8px;
-      border-radius: 2px;
-      margin-left: .5em;
-      position: relative;
-      top: -1px;
     }
     .errors {
       color: red;
@@ -44,16 +33,15 @@
     <section class="block">
         <h1 class="block-title">GAS翻訳</h1>
         <div class="block-body">
-          <form action="" class="form">
-          <fieldset>
-            <div class="form-group">
-              <label for="name">翻訳したい文章（日本語）<span class="badge">10文字</span></label>
-              <p class="errors" v-for="error in errors.name">{{error}}</p>
-              <input type="text" name="name" id="name" v-model="name" v-on:input="validator('name', 10)">
-            </div>
-          </fieldset>
-        </form>
-      </div>
+            <fieldset>
+              <div class="form-group">
+                <label for="name">翻訳したい文章（日本語）</label>
+                <input type="text" name="name" id="name" v-model="input">
+              </div>
+              <button class="button" @click="trans(input)">英語に翻訳</button>
+              <label for="name">{{output}}</label>
+            </fieldset>
+        </div>
     </section>
   </main>
 </div>
@@ -62,38 +50,22 @@
   var vm = new Vue({
     el: '#app',
     data: {
-      name: '', //お名前
-      subject: '', //件名
-      contents: '', //内容
-      errors: {
-        name: [],
-        subject: [],
-        contents: []
-      }
+      input: '',
+      output: ''
     },
     methods: {
-      validator: function (type, max) {
-        let name = []
-        let subject = []
-        let contents = []
-        let message = max + '文字以内で入力してください。'
-        if (type === 'name') {
-          if (this.name.length > max) {
-            name.push(message);
+      trans(input){
+        axios.get('https://script.google.com/macros/s/AKfycbwslso6KP1b4rBQfDcIrVBh7iJmGzdrvqBKq6s7nfBUTZPeCSlPNg-6-rLjSnnvmhxWYA/exec', {
+          params: {
+            text:input,
+            source:'ja',
+            target:'en'
           }
-          this.errors.name = name
-        } else if (type === 'subject') {
-          if (this.subject.length > max) {
-            subject.push(message);
-          }
-          this.errors.subject = subject
-        } else if (type === 'contents') {
-          if (this.contents.length > max) {
-            contents.push(message);
-          }
-          this.errors.contents = contents
-        }
-      },
+        })
+        .then(response => {
+          this.output = response.data
+        })
+      }
     },
   });
 </script>
